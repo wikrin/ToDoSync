@@ -1,0 +1,8 @@
+{
+    "tempPath" : "data/temp.py",
+    "databasePath" : "data/syncdone.db",
+    "day" : 1,
+    "Prefer" : "outlook.timezone=\"Asia/Shanghai\"",
+    "authority": "https://login.microsoftonline.com/common",
+    "redirect_uri" : "http://localhost/myapp/"
+}
