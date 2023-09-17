@@ -14,5 +14,5 @@ if __name__ == "__main__":
         if e == 1:
             logger.info("没有获取到新的日程")
     finally:
-            graph.getsks()
-            bgm.updata()
+        graph.getsks()
+        bgm.updata()
