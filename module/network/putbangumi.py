@@ -17,7 +17,7 @@ class Bangumi:
     def updata(self):
         __headers = {
             'Content-Type': 'application/json',
-            'User-Agent': 'wikrin/my-private-project (todosync)',
+            'User-Agent': 'wikrin/ToDoSync (https://github.com/wikrin/ToDoSync)',
         }
         __headers.update(self.__Authorization)
 
