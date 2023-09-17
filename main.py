@@ -1,9 +1,9 @@
+import logging
 from module import *
-from module.graph import Graph
 from module.utils.calSQLite import SQL
 from module.network.putbangumi import Bangumi
 
-logger = log.getlogger(__name__)
+logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     sql = SQL()
     graph = Graph()
