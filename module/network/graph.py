@@ -51,7 +51,6 @@ class Graph:
         else:
             # event = json.dumps(calender.json()["value"], indent=2, sort_keys=True, ensure_ascii=False)
             if calender.status_code == 200:
-                print(event)
                 calenderlist: list = [
                     {
                         "subject": fanlist['subject'],
@@ -123,7 +122,6 @@ class Graph:
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             data=parse.urlencode(self.__body),
         )
-        print(self.__body)
         if retoken.status_code == 200:
             logger.info("token刷新请求成功")
             tokendict = retoken.json()
@@ -131,7 +129,6 @@ class Graph:
             if "refresh_token" in tokendict:
                 jslist['refresh_token'] = tokendict['refresh_token']
             msft = {'MICROSOFT': jslist}
-            print(msft)
             logger.info("正在保存")
             if sql.add(rule=msft, table='init'):
                 self.__httpm.__init__()

@@ -117,7 +117,6 @@ class SQL:
                 #     sql['status'],
                 #     0))
                 except sqlite3.IntegrityError:
-                    print(tup)
                     if self.initupdate(
                         'init', (tup[0][1], tup[1][1]), [(tup[0][0], tup[1][0])]
                     ):
@@ -132,7 +131,6 @@ class SQL:
     ) -> bool:
         where_clause: str = ' WHERE 1=1 '
         params = []
-        print(col_value, where)
         query = f'UPDATE {table} SET'
         query += f" `{col_value[0]}` ='{col_value[1]}'"
         for clause in where:

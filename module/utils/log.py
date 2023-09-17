@@ -7,3 +7,6 @@ def getlogger(name: str = 'root'):
         logging.config.fileConfig(conf, disable_existing_loggers=False)
     logger = logging.getLogger(name)
     return logger
+
+
+logger = getlogger()
