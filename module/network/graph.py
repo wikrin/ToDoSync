@@ -80,11 +80,22 @@ class Graph:
                 logger.error(f"日历事件列表请求失败:{event}")
                 exit()
 
-    def confine(self, hours: int = 16) -> tuple:
-        today = datetime.utcnow() - timedelta(hours=hours)
-        morrow = today + timedelta(days=self.__httpm.DAY)
-        starttime = today.strftime("%Y-%m-%d") + "T16:00:00"
-        endtime = morrow.strftime("%Y-%m-%d") + "T15:59:59"
+    def confine(self) -> tuple[str, str]:
+        today: datetime = datetime.utcnow() - timedelta(hours=16)
+        morrow: datetime = today + timedelta(days=self.__httpm.DAY)
+        start: str = datetime.strftime(
+            datetime.strptime(self.__httpm.CONFIG['start'], "%H:%M:%S")
+            - timedelta(hours=8),
+            "%H:%M:%S",
+        )
+        end: str = datetime.strftime(
+            datetime.strptime(self.__httpm.CONFIG['end'], "%H:%M:%S")
+            - timedelta(hours=8),
+            "%H:%M:%S",
+        )
+
+        starttime: str = f"{today.strftime('%Y-%m-%d')}T{start}"
+        endtime: str = f"{morrow.strftime('%Y-%m-%d')}T{end}"
         return (starttime, endtime)
 
     def check(self) -> bool:
