@@ -99,14 +99,6 @@ class Graph:
         return (starttime, endtime)
 
     def check(self) -> bool:
-        # self.__body:dict = httpm.take([
-        # "client_id",
-        # "scope",
-        # "redirect_uri",
-        # "client_secret",
-        # "refresh_token"
-        # ])
-
         checktoken = requests.get(
             "https://graph.microsoft.com/v1.0/me/calendars",
             headers={'Authorization': self.__httpm.CONFIG['Authorization']},
@@ -119,17 +111,18 @@ class Graph:
             tokens = {"refresh_token": self.__httpm.CONFIG['refresh_token']}
             logger.info("读取refresh ...")
 
-        self.__body = {'grant_type': 'refresh_token'}
+        self.__body = {
+            'grant_type': 'refresh_token',
+            'redirect_uri': "http://localhost/myapp/",
+        }
 
         self.__body.update(
-            self.__httpm.ltd(
-                ["client_id", "scope", "redirect_uri", "client_secret", "refresh_token"]
-            )
+            self.__httpm.ltd(["client_id", "scope", "client_secret", "refresh_token"])
         )
 
         logger.info("以refresh token刷新token")
         retoken = requests.post(
-            f"{self.__httpm.CONFIG['authority']}/oauth2/v2.0/token",
+            "https://login.microsoftonline.com/common/oauth2/v2.0/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             data=parse.urlencode(self.__body),
         )

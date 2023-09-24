@@ -4,7 +4,5 @@
     "day" : 1,
     "start" : "06:00:00",
     "end" : "06:00:00",
-    "Prefer" : "outlook.timezone=\"Asia/Shanghai\"",
-    "authority": "https://login.microsoftonline.com/common",
-    "redirect_uri" : "http://localhost/myapp/"
+    "Prefer" : "outlook.timezone=\"Asia/Shanghai\""
 }
