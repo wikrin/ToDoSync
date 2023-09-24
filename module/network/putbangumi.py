@@ -45,3 +45,5 @@ class Bangumi:
             except Exception as e:
                 logger.error(f"错误详情：{e}")
                 exit()
+
+        logger.info("Bangumi点格子全结束")
