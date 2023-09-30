@@ -1,6 +1,7 @@
 {
     "tempPath" : "data/temp.py",
     "databasePath" : "data/syncdone.db",
+    "calName" : "番剧放送",
     "day" : 1,
     "start" : "06:00:00",
     "end" : "06:00:00",

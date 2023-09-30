@@ -20,8 +20,8 @@ class Graph:
     def __init__(self, inc: str = 'MICROSOFT'):
         self.__httpm = HttpMag(inc)
         if self.check():
+            self.__CAL = self.calID()
             self.__date = self.confine()
-            self.__CAL = self.__httpm.CONFIG['calendarsid']
             self.__Authorization = {
                 'Authorization': self.__httpm.CONFIG['Authorization']
             }
@@ -215,3 +215,13 @@ class Graph:
         for up in tasksup:
             sql.initupdate('data', up[0], [up[1]])
         return tasksup
+
+    def calID(self) -> str:
+        checktoken = requests.get(
+            "https://graph.microsoft.com/v1.0/me/calendars",
+            headers={'Authorization': self.__httpm.CONFIG['Authorization']},
+        )
+        for id in checktoken.json()['value']:
+            if id['name'] == self.__httpm.CONFIG['calName']:
+                calid: str = id['id']
+        return calid
