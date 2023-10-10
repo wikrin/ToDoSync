@@ -41,7 +41,6 @@ class Bangumi:
                         where=[('epID', id)],
                     )
                     logger.info(f"ID:{id}进度完成")
-                    return True
             except Exception as e:
                 logger.error(f"错误详情：{e}")
                 exit()
