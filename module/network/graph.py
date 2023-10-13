@@ -163,13 +163,21 @@ class Graph:
             id = self.ListID()
         taskbody: dict = {
             "title": dict['subject'],
+            # "body": {
+            #     "content": f"https://bgm.tv/ep/{dict['epID']}",
+            #     "contentType": "text",
+            # },
+            # "reminderDateTime": {
             "startDateTime": {
                 "dateTime": dict['startTime'],
                 "timeZone": "Asia/Shanghai",
             },
-            "dueDateTime": {"dateTime": dict['endTime'], "timeZone": "Asia/Shanghai"},
+            "dueDateTime": {
+                "dateTime": dict['endTime'],
+                "timeZone": "Asia/Shanghai",
+            },
             "importance": "normal",
-            "isReminderOn": "False",
+            "isReminderOn": "false",
             "linkedResources": [
                 {
                     "webUrl": f"https://bgm.tv/ep/{dict['epID']}",
