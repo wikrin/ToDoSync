@@ -14,7 +14,8 @@ class HttpMag(Config):
         if os.path.exists(PATH):
             self.__privacy()
         super().__init__()
-        self.CONFIG = self.take()
+        self.CONFIG = self.config
+        self.CONFIG.update(self.take())
 
     def __privacy(self) -> bool:
         from data.temp import temp
@@ -26,7 +27,7 @@ class HttpMag(Config):
             raise
 
     def take(self) -> dict:
-        js: dict = self.config
+        js: dict = {}
         __db = self.__sql.select('init', column=['KEY', self.__inc])
         for __kv in __db:
             js[__kv[0]] = __kv[1]

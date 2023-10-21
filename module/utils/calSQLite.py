@@ -31,10 +31,10 @@ class SQL:
                     `ID` INTEGER PRIMARY KEY AUTOINCREMENT,
                     `epID` INTEGER NOT NULL UNIQUE,
                     `subject` TEXT NOT NULL,
-                    `calID` TEXT,
-                    `todoID` TEXT,
-                    `status` TEXT NULL,
-                    `type` INT NULL);
+                    `EP` INTEGER NOT NULL,
+                    `subject_id` INTEGER NOT NULL,
+                    `status` TEXT NOT NULL,
+                    `type` INTEGER NULL);
                                 
                 CREATE TABLE IF NOT EXISTS init(
                     `ID` INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,13 +112,15 @@ class SQL:
                     )  #
                 #     sql['epID'],
                 #     sql['subject'],
-                #     sql['calID'],
+                #     sql['EP'],
                 #     sql['todoID'],
                 #     sql['status'],
                 #     0))
                 except sqlite3.IntegrityError:
                     if self.initupdate(
-                        'init', (tup[0][1], tup[1][1]), [(tup[0][0], tup[1][0])]
+                        table='init',
+                        col_value=[(tup[0][1], tup[1][1])],
+                        where=[(tup[0][0], tup[1][0])],
                     ):
                         continue
                     else:
@@ -127,14 +129,17 @@ class SQL:
 
     # rule
     def initupdate(
-        self, table: str, col_value: tuple, where: list[tuple] = [('epID', 0)]
+        self, table: str, col_value: list[tuple], where: list[tuple] = [('epID', 0)]
     ) -> bool:
         where_clause: str = ' WHERE 1=1 '
         params = []
-        query = f'UPDATE {table} SET'
-        query += f" `{col_value[0]}` ='{col_value[1]}'"
+        upset = []
+        for col_val in col_value:
+            colval = f"`{col_val[0]}` = '{col_val[1]}'"
+            upset.append(colval)
+        query = f"UPDATE {table} SET {', '.join(upset)}"
         for clause in where:
-            where_clause += f'AND {clause[0]} = ?'
+            where_clause += f'AND {clause[0]}=?'
             params.append(clause[1])
             with self.conn:
                 self.cur.execute(query + where_clause, params)
@@ -160,7 +165,7 @@ class SQL:
         params = []
         if where[0]:
             for clause in where:
-                where_clause += f'AND {clause[0]} = ?'
+                where_clause += f'AND {clause[0]}=?'
                 params.append(clause[1])
         query = f'SELECT {", ".join(column)} FROM {table}' + where_clause
         with self.conn:

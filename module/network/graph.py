@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import re
 from urllib import parse
 from module.utils.calSQLite import SQL
-from conf.unique import HttpMag
+from conf.unique import HttpMag, os
 
 logger = logging.getLogger(__name__)
 sql = SQL()
@@ -19,23 +19,22 @@ class Graph:
 
     def __init__(self, inc: str = 'MICROSOFT'):
         self.__httpm = HttpMag(inc)
-        if self.check():
-            self.__CAL = self.calID()
-            self.__date = self.confine()
-            self.__Authorization = {
-                'Authorization': self.__httpm.CONFIG['Authorization']
-            }
+        self.__httpm.CONFIG['refresh_token'] = os.environ.get('MSFT_REFRESH')
+        self.__Authorization = {"Authorization": self.refresh()}
+        self.__CAL = self.calID()
+        self.__date = self.confine()
+        self.ToListID = self.ListID()
 
     # __headers.update({
     #     "Prefer" : config.config['Prefer']
     # })
 
     def CalView(self) -> list:
-        __headers = {"Content-Type": "application/json"}
-        __headers.update(self.__httpm.ltd(['Authorization', 'Prefer']))
-        # __headers.update(self.__httpm.ltd(['Authorization', 'Prefer']))
-
-        # seq = ['Authorization', 'Prefer']
+        __headers = {
+            **{"Content-Type": "application/json"},
+            **self.__httpm.ltd(['Prefer']),
+            **self.__Authorization,
+        }
 
         logger.info("获取日历事件列表")
         try:
@@ -55,14 +54,28 @@ class Graph:
                     {
                         "subject": fanlist['subject'],
                         "epID": int(re.sub(r'\D', "", fanlist['bodyPreview'])),
-                        "calID": fanlist['id'],
+                        "subject_id": int(
+                            bytes.fromhex(fanlist['iCalUId'][104:-2])
+                            .decode('utf-8')
+                            .split('-')[0]
+                        ),
+                        "EP": int(
+                            bytes.fromhex(fanlist['iCalUId'][104:-2])
+                            .decode('utf-8')
+                            .split('-')[1]
+                        ),
                         "startTime": fanlist['start']['dateTime'],
                         "endTime": fanlist['end']['dateTime'],
+                        "type": int(
+                            bytes.fromhex(fanlist['iCalUId'][104:-2])
+                            .decode('utf-8')
+                            .split('-')[-1]
+                        ),
                     }
                     for fanlist in event
                     if len(
                         sql.select(
-                            'data',
+                            table='data',
                             column=['*'],
                             where=[
                                 ('epID', int(re.sub(r'\D', "", fanlist['bodyPreview'])))
@@ -98,29 +111,25 @@ class Graph:
         endtime: str = f"{morrow.strftime('%Y-%m-%d')}T{end}"
         return (starttime, endtime)
 
-    def check(self) -> bool:
-        checktoken = requests.get(
-            "https://graph.microsoft.com/v1.0/me/calendars",
-            headers={'Authorization': self.__httpm.CONFIG['Authorization']},
-        )
-        if checktoken.status_code == 200:
-            logger.info("token时效期内")
-            return True
-        elif checktoken.status_code == 401:
-            logger.info("token失效")
-            tokens = {"refresh_token": self.__httpm.CONFIG['refresh_token']}
-            logger.info("读取refresh ...")
+    def refresh(self):
+        tokens = {"refresh_token": self.__httpm.CONFIG['refresh_token']}
+        logger.info("读取refresh ...")
 
         self.__body = {
-            'grant_type': 'refresh_token',
-            'redirect_uri': "http://localhost/myapp/",
+            **{
+                'grant_type': 'refresh_token',
+                'redirect_uri': "http://localhost/myapp/",
+            },
+            **self.__httpm.ltd(
+                ["client_id", "scope", "client_secret", "refresh_token"]
+            ),
         }
 
-        self.__body.update(
-            self.__httpm.ltd(["client_id", "scope", "client_secret", "refresh_token"])
-        )
+        # self.__body.update(
+        #     self.__httpm.ltd(["client_id", "scope", "client_secret", "refresh_token"])
+        # )
 
-        logger.info("以refresh token刷新token")
+        logger.info("刷新token")
         retoken = requests.post(
             "https://login.microsoftonline.com/common/oauth2/v2.0/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -129,15 +138,15 @@ class Graph:
         if retoken.status_code == 200:
             logger.info("token刷新请求成功")
             tokendict = retoken.json()
-            jslist: dict = {"Authorization": "Bearer " + tokendict['access_token']}
-            if "refresh_token" in tokendict:
-                jslist['refresh_token'] = tokendict['refresh_token']
-            msft = {'MICROSOFT': jslist}
-            logger.info("正在保存")
-            if sql.add(rule=msft, table='init'):
-                self.__httpm.__init__()
-                logger.info("保存成功")
-                return True
+            __token: str = "Bearer " + tokendict['access_token']
+            # if "refresh_token" in tokendict:
+            #     jslist['refresh_token'] = tokendict['refresh_token']
+            # msft = {'MICROSOFT': jslist}
+            # logger.info("正在保存")
+            # if sql.add(rule=msft, table='init'):
+            #     self.__httpm.__init__()
+            #     logger.info("保存成功")
+            return __token
         else:
             logger.info("token刷新失败")
             raise
@@ -158,9 +167,8 @@ class Graph:
                 logger.debug(f"ID为:{todoid}")
             return todoid
 
-    def postTasks(self, dict: dict, id: str = None):
-        if id == None:
-            id = self.ListID()
+    def postTasks(self, dict: dict):
+        value = "low" if dict['type'] == 0 else "normal"
         taskbody: dict = {
             "title": dict['subject'],
             # "body": {
@@ -176,7 +184,7 @@ class Graph:
                 "dateTime": dict['endTime'],
                 "timeZone": "Asia/Shanghai",
             },
-            "importance": "normal",
+            "importance": value,
             "isReminderOn": "false",
             "linkedResources": [
                 {
@@ -188,7 +196,7 @@ class Graph:
         logger.info(f"正在创建任务:{dict['subject']}")
         try:
             task = requests.post(
-                f"https://graph.microsoft.com/v1.0/me/todo/lists/{id}/tasks",
+                f"https://graph.microsoft.com/v1.0/me/todo/lists/{self.ToListID}/tasks",
                 headers=self.__headers,
                 data=json.dumps(taskbody),
             )
@@ -200,11 +208,11 @@ class Graph:
             logger.info(f"{todo['title']},完成")
             return {"todoID": todo['id'], "status": todo['status']}
         else:
-            logger.info(f"{todo}['title'],失败")
+            logger.info(f"{todo['title']},失败")
 
     def getsks(self) -> list:
         list = sql.select(
-            'data', column=['epID'], where=[('status', 'notStarted'), ('type', 0)]
+            'data', column=['epID'], where=[('status', 'notStarted'), ('type !', 2)]
         )
         num: list = [id[0] for id in list]
         tasks = requests.get(
@@ -213,21 +221,28 @@ class Graph:
         )
         taskjs = tasks.json()['value']
         tasksup: list = [
-            [
-                ('status', task['status']),
+            (
+                [
+                    ('status', task['status']),
+                    ('type', 0 if task['importance'] == "low" else 1),
+                ],
                 ('epID', int(re.sub(r'\D', "", task['linkedResources'][0]['webUrl']))),
-            ]
+            )
             for task in taskjs
             if int(re.sub(r'\D', "", task['linkedResources'][0]['webUrl'])) in num
         ]
         for up in tasksup:
-            sql.initupdate('data', up[0], [up[1]])
+            sql.initupdate(
+                table='data',
+                col_value=up[0],
+                where=[up[1]],
+            )
         return tasksup
 
     def calID(self) -> str:
         checktoken = requests.get(
             "https://graph.microsoft.com/v1.0/me/calendars",
-            headers={'Authorization': self.__httpm.CONFIG['Authorization']},
+            headers=self.__Authorization,
         )
         for id in checktoken.json()['value']:
             if id['name'] == self.__httpm.CONFIG['calName']:

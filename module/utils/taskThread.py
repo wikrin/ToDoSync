@@ -6,15 +6,15 @@ def threadPool(tasks: any, parlist: list) -> dict:
         sqlData: list = []
         response = pool.map(tasks, parlist)
         responses = list(zip(parlist, response))
-        for calid, todoid in responses:
+        for cal, todo in responses:
             sqlData.append(
                 {
-                    "epID": calid['epID'],
-                    "subject": calid['subject'],
-                    "calID": calid['calID'],
-                    "todoID": todoid['todoID'],
-                    "status": todoid['status'],
-                    "type": 0,
+                    "epID": cal['epID'],
+                    "subject": cal['subject'],
+                    "EP": cal['EP'],
+                    "subject_id": cal['subject_id'],
+                    "status": todo['status'],
+                    "type": cal['type'],
                 }
             )
     return sqlData
