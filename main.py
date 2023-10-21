@@ -1,8 +1,13 @@
 import logging
-from dotenv import load_dotenv
 from module import *
 
-load_dotenv("conf/.env")
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv("conf/.env")
+except:
+    pass
+
 logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     sql = SQL()
