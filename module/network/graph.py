@@ -224,7 +224,7 @@ class Graph:
             (
                 [
                     ('status', task['status']),
-                    ('type', 0 if task['importance'] == "low" else 1),
+                    ('type', 3 if task['importance'] == "high" else 1 if task['importance'] == "normal" else 0),
                 ],
                 ('epID', int(re.sub(r'\D', "", task['linkedResources'][0]['webUrl']))),
             )
