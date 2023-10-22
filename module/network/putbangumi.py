@@ -41,10 +41,23 @@ class Bangumi:
             "type": 2,
         }
         try:
-            resource = requests.put(
+            resource = requests.patch(
                 f"https://api.bgm.tv//v0/users/-/collections/{subject_id}/episodes",
                 headers=self.__headers,
                 data=json.dumps(__body),
+            )
+            return resource.status_code
+
+        except Exception as e:
+            logger.error(f"错误详情：{e}")
+            exit()
+
+    def post_sub(self, subject_id: str | int, type: str | int) -> int:
+        try:
+            resource = requests.post(
+                f"https://api.bgm.tv/v0/users/-/collections/{subject_id}",
+                headers=self.__headers,
+                data=json.dumps({"type": type}),
             )
             return resource.status_code
 
@@ -61,24 +74,23 @@ class Bangumi:
         for subid, epid, ep, type in resql:
             status:int = None
             match type:
-                case 0:
+                case 0:  #更新进度到当前话并标记为看过
+                    if self.patch_eps(
+                        subject_id=subid,
+                        episode_id=epid,
+                        ep=ep,
+                    ) and self.post_sub(subject_id=subid, type={type}) == 204:
+                        status = 204
+
+                case 2:  #更新当前话
                     status = self.put_ep(episode_id=epid)
-                case 1:
-                    status = self.patch_eps(
-                        subject_id=subid,
-                        episode_id=epid,
-                        ep=ep,
-                    )
-                case 3:
-                    status = self.patch_eps(
-                        subject_id=subid,
-                        episode_id=epid,
-                        ep=ep,
-                    )
+
+                case 4:  #搁置
+                    status = self.post_sub(subject_id=subid, type={type})
             if status == 204:
                 sql.initupdate(
                     table='data',
-                    col_value=[('type', 2)],
+                    col_value=[('status', 'done')],
                     where=[('epID', epid)],
                 )
                 logger.info(f"ID:{epid}进度完成")

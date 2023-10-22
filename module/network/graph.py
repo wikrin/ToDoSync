@@ -25,10 +25,6 @@ class Graph:
         self.__date = self.confine()
         self.ToListID = self.ListID()
 
-    # __headers.update({
-    #     "Prefer" : config.config['Prefer']
-    # })
-
     def CalView(self) -> list:
         __headers = {
             **{"Content-Type": "application/json"},
@@ -125,10 +121,6 @@ class Graph:
             ),
         }
 
-        # self.__body.update(
-        #     self.__httpm.ltd(["client_id", "scope", "client_secret", "refresh_token"])
-        # )
-
         logger.info("刷新token")
         retoken = requests.post(
             "https://login.microsoftonline.com/common/oauth2/v2.0/token",
@@ -139,13 +131,7 @@ class Graph:
             logger.info("token刷新请求成功")
             tokendict = retoken.json()
             __token: str = "Bearer " + tokendict['access_token']
-            # if "refresh_token" in tokendict:
-            #     jslist['refresh_token'] = tokendict['refresh_token']
-            # msft = {'MICROSOFT': jslist}
-            # logger.info("正在保存")
-            # if sql.add(rule=msft, table='init'):
-            #     self.__httpm.__init__()
-            #     logger.info("保存成功")
+
             return __token
         else:
             logger.info("token刷新失败")
@@ -224,7 +210,7 @@ class Graph:
             (
                 [
                     ('status', task['status']),
-                    ('type', 3 if task['importance'] == "high" else 1 if task['importance'] == "normal" else 0),
+                    ('type', 0 if task['importance'] == "high" else 1 if task['importance'] == "normal" else 2 if task['importance'] == "low" else 4),
                 ],
                 ('epID', int(re.sub(r'\D', "", task['linkedResources'][0]['webUrl']))),
             )
