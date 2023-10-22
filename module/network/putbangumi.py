@@ -53,40 +53,50 @@ class Bangumi:
             exit()
 
     def post_sub(self, subject_id: str | int, type: str | int) -> int:
-        try:
-            resource = requests.post(
-                f"https://api.bgm.tv/v0/users/-/collections/{subject_id}",
-                headers=self.__headers,
-                data=json.dumps({"type": type}),
-            )
-            return resource.status_code
+        # try:
+        resource = requests.post(
+            f"https://api.bgm.tv/v0/users/-/collections/{subject_id}",
+            headers=self.__headers,
+            data=json.dumps({"type": type}),
+        )
+        logger.error(resource)
+        return resource.status_code
 
-        except Exception as e:
-            logger.error(f"错误详情：{e}")
-            exit()
+        # except Exception as e:
+        logger.error(f"错误详情：{e}")
+        exit()
 
     def updata(self):
         resql = sql.select(
             'data',
             column=['subject_id', 'epID', 'EP', 'type'],
-            where=[('status', 'completed'), ('type !', 2)],
+            where=[('status', 'completed')],
         )
         for subid, epid, ep, type in resql:
-            status:int = None
+            status: int = None
             match type:
-                case 0:  #更新进度到当前话并标记为看过
-                    if self.patch_eps(
+                case 0:  # 更新进度到当前话并标记为看过
+                    if (
+                        self.patch_eps(
+                            subject_id=subid,
+                            episode_id=epid,
+                            ep=ep,
+                        )
+                        and self.post_sub(subject_id=subid, type=2) == 204
+                    ):
+                        status = 204
+                case 1:  # 更新进度到当前话
+                    status = self.patch_eps(
                         subject_id=subid,
                         episode_id=epid,
                         ep=ep,
-                    ) and self.post_sub(subject_id=subid, type={type}) == 204:
-                        status = 204
+                    )
 
-                case 2:  #更新当前话
+                case 2:  # 更新当前话
                     status = self.put_ep(episode_id=epid)
 
-                case 4:  #搁置
-                    status = self.post_sub(subject_id=subid, type={type})
+                case 4:  # 搁置
+                    status = self.post_sub(subject_id=subid, type=type)
             if status == 204:
                 sql.initupdate(
                     table='data',
