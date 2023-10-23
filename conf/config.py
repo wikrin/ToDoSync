@@ -22,17 +22,10 @@ class Config:
                 Config.instance_dict[str(args[0])] = _instance
         return Config.instance_dict[str(args[0])]
 
-    # _instance_lock = threading.Lock()
-
-    # def __new__(cls, str:str='null'):
-    #     if not hasattr(cls, 'instance_dict'):
-    #         Config.instance_dict = {}
-
-    #     if str not in Config.instance_dict.keys():
-    #         with Config._instance_lock:
-    #                 _instance = super().__new__(cls)
-    #                 Config.instance_dict[str] = _instance
-    #     return Config.instance_dict[str]
+    # def __new__(cls, *args):
+    #     if not hasattr(cls, '_instance'):
+    #         _instance = super().__new__(cls)
+    #     return _instance
 
     def __init__(self) -> dict:
         self.config: dict = self.load()

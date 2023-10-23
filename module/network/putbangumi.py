@@ -10,7 +10,6 @@ sql = SQL()
 
 class Bangumi:
     def __init__(self, inc: str = 'BANGUMI'):
-        self.__httpm = HttpMag(inc)
         self.__Authorization = {'Authorization': os.environ.get('BGM_TOKEN')}
         self.__headers = {
             'Content-Type': 'application/json',
@@ -79,19 +78,19 @@ class Bangumi:
                     sqlmsg = self.patch_eps(episode_id=epid, ep=ep)
                     if sqlmsg[0] == 204:
                         status = (self.patch_sub(), sqlmsg[-1])
-                    infomsg:str = '看过'
+                    infomsg: str = '看过'
                 case 1:  # 更新进度到当前话
                     status = self.patch_eps(episode_id=epid, ep=ep)
-                    infomsg:str = '看到'
+                    infomsg: str = '看到'
                 case 2:  # 更新当前话
                     # status = self.put_ep(episode_id=epid)
                     status = self.patch_eps(episode_id=epid)
-                    infomsg:str = '看过'
+                    infomsg: str = '看过'
                 case 4:  # 搁置当前话并搁置番剧
                     sqlmsg = self.patch_eps(episode_id=epid, ep=1)
                     if sqlmsg[0] == 204:
                         status = (self.patch_sub(type=type), sqlmsg[-1])
-                    infomsg:str = '搁置在'
+                    infomsg: str = '搁置在'
             if status[0] == 204:
                 sql.initupdate(
                     table='data',

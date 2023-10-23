@@ -150,7 +150,7 @@ class Graph:
         for name in todolist:
             if name["displayName"] == "任务":
                 todoid: str = name["id"]
-                logger.debug(f"ID为:{todoid}")
+                logger.info(f"ID获取完成")
             return todoid
 
     def postTasks(self, dict: dict):

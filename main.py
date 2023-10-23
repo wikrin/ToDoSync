@@ -18,7 +18,7 @@ if __name__ == "__main__":
         test = threadPool(graph.postTasks, cal)
         done = sql.add(test)
     except SystemExit as e:
-        if e == 1:
+        if e.code == 1:
             logger.info("没有获取到新的日程")
     finally:
         graph.getsks()
