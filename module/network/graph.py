@@ -198,7 +198,11 @@ class Graph:
 
     def getsks(self) -> list:
         list = sql.select(
-            'data', column=['epID'], where=[('status', 'notStarted'), ('type !', 2)]
+            'data',
+            column=['epID'],
+            where=[
+                ('status', 'notStarted'),
+            ],
         )
         num: list = [id[0] for id in list]
         tasks = requests.get(
@@ -210,7 +214,16 @@ class Graph:
             (
                 [
                     ('status', task['status']),
-                    ('type', 0 if task['importance'] == "high" else 1 if task['importance'] == "normal" else 2 if task['importance'] == "low" else 4),
+                    (
+                        'type',
+                        0
+                        if task['importance'] == "high"
+                        else 1
+                        if task['importance'] == "normal"
+                        else 2
+                        if task['importance'] == "low"
+                        else 4,
+                    ),
                 ],
                 ('epID', int(re.sub(r'\D', "", task['linkedResources'][0]['webUrl']))),
             )
