@@ -46,6 +46,7 @@ class Graph:
         else:
             # event = json.dumps(calender.json()["value"], indent=2, sort_keys=True, ensure_ascii=False)
             if calender.status_code == 200:
+                onsql = sql.select(table='data', column=['epID'], where=[('status !', 'done')])
                 calenderlist: list = [
                     {
                         "subject": fanlist['subject'],
@@ -69,17 +70,7 @@ class Graph:
                         ),
                     }
                     for fanlist in event
-                    if len(
-                        sql.select(
-                            table='data',
-                            column=['*'],
-                            where=[
-                                ('epID', int(re.sub(r'\D', "", fanlist['bodyPreview'])))
-                            ],
-                        )
-                    )
-                    == 0
-                ]
+                    if int(re.sub(r'\D', "", fanlist['bodyPreview'])) not in onsql]
 
                 logger.info(f"新获得{len(calenderlist)}个列表")
                 if len(calenderlist) == 0:

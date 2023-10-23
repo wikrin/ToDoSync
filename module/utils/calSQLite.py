@@ -65,11 +65,6 @@ class SQL:
             else:  # 传入数据结构不是list-dict则输出日志
                 logger.error(f"参数错误,数据结构:{type(rule)}-{type(rule[0])}不受支持")
 
-        # elif type(rule) == dict and type(rule.keys()[0]) == list:
-
-        #     self.__key_value.append([tuple(rule), tuple(dict.values(rule))])
-        #     return self.__key_value
-
         elif (
             out == 'IN'
             and type(rule) == dict
@@ -109,13 +104,8 @@ class SQL:
                 try:
                     self.cur.execute(
                         f'''{method} INTO {table} {tup[0]} VALUES {tup[1]}'''
-                    )  #
-                #     sql['epID'],
-                #     sql['subject'],
-                #     sql['EP'],
-                #     sql['todoID'],
-                #     sql['status'],
-                #     0))
+                    )
+
                 except sqlite3.IntegrityError:
                     if self.initupdate(
                         table='init',
@@ -144,17 +134,6 @@ class SQL:
             with self.conn:
                 self.cur.execute(query + where_clause, params)
                 return True
-
-    # def initupdate(self, rule:list, column:str='MICROSOFT') -> bool:
-    #     with self.conn:
-    #         for dt in rule:
-    #             self.cur.execute(f''' UPDATE `init` SET `{column}`='{dt[1]}' WHERE `KEY`='{dt[0]}' ''')
-    #             return True
-
-    # def update(self, column:str, value:str, epid:int) -> bool:
-    #     with self.conn:
-    #         self.cur.execute(f'''UPDATE `data` SET{column}={value} WHERE epID={epid} ''')
-    #     return True
 
     def select(
         self, table: str, column: list[str] = ['MICROSOFT'], where: list[tuple] = [()]
