@@ -137,7 +137,7 @@ class SQL:
 
     def select(
         self, table: str, column: list[str] = ['MICROSOFT'], where: list[tuple] = [()]
-    ) -> list:
+    ) -> list[tuple]:
         # 参数table:表名，column:查询多个列将列名以字符串类型放入一个元组，放入的顺序决定返回字典的键和值
         # where:查询条件 条件的键值以元组形式放入列表中 [0]为查询键，[1]为查询值
         where_clause: str = ' WHERE 1=1 '

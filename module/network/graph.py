@@ -25,7 +25,7 @@ class Graph:
         self.__date = self.confine()
         self.ToListID = self.ListID()
 
-    def CalView(self) -> list:
+    def CalView(self) -> list[dict]:
         __headers = {
             **{"Content-Type": "application/json"},
             **self.__httpm.ltd(['Prefer']),
@@ -46,7 +46,9 @@ class Graph:
         else:
             # event = json.dumps(calender.json()["value"], indent=2, sort_keys=True, ensure_ascii=False)
             if calender.status_code == 200:
-                onsql = sql.select(table='data', column=['epID'], where=[('status !', 'done')])
+                onsql = sql.select(
+                    table='data', column=['epID'], where=[('status !', 'done')]
+                )[0]
                 calenderlist: list = [
                     {
                         "subject": fanlist['subject'],
@@ -70,7 +72,8 @@ class Graph:
                         ),
                     }
                     for fanlist in event
-                    if int(re.sub(r'\D', "", fanlist['bodyPreview'])) not in onsql]
+                    if int(re.sub(r'\D', "", fanlist['bodyPreview'])) not in onsql
+                ]
 
                 logger.info(f"新获得{len(calenderlist)}个列表")
                 if len(calenderlist) == 0:
