@@ -46,9 +46,10 @@ class Graph:
         else:
             # event = json.dumps(calender.json()["value"], indent=2, sort_keys=True, ensure_ascii=False)
             if calender.status_code == 200:
-                onsql = sql.select(
+                resql = sql.select(
                     table='data', column=['epID'], where=[('status !', 'done')]
-                )[0]
+                )
+                onsql = resql[0] if resql else []
                 calenderlist: list = [
                     {
                         "subject": fanlist['subject'],
@@ -148,7 +149,7 @@ class Graph:
             return todoid
 
     def postTasks(self, dict: dict):
-        value = "low" if dict['type'] == 0 else "normal"
+        value = "low" if dict['type'] == 0 else "high"
         taskbody: dict = {
             "title": dict['subject'],
             # "body": {
@@ -188,7 +189,7 @@ class Graph:
             logger.info(f"{todo['title']},完成")
             return {"todoID": todo['id'], "status": todo['status']}
         else:
-            logger.info(f"{todo['title']},失败")
+            logger.info(f"响应代码:{task.status_code}")
 
     def getsks(self) -> list:
         list = sql.select(

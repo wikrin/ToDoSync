@@ -15,8 +15,8 @@ if __name__ == "__main__":
     bgm = Bangumi()
     try:
         cal = graph.CalView()
-        test = threadPool(graph.postTasks, cal)
-        done = sql.add(test)
+        sql_dict = threadPool(graph.postTasks, cal)
+        done = sql.add(sql_dict)
     except SystemExit as e:
         if e.code == 1:
             logger.info("没有获取到新的日程")
