@@ -148,7 +148,7 @@ class Graph:
             return todoid
 
     def postTasks(self, dict: dict):
-        value = "low" if dict['type'] == 0 else "normal"
+        value = "low" if dict['type'] == 0 else "high"
         taskbody: dict = {
             "title": dict['subject'],
             # "body": {
