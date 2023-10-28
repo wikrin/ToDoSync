@@ -49,7 +49,7 @@ class Graph:
                 resql = sql.select(
                     table='data', column=['epID'], where=[('status !', 'done')]
                 )
-                onsql = resql[0] if resql else []
+                onsql = [id[0] for id in resql if resql]
                 calenderlist: list = [
                     {
                         "subject": fanlist['subject'],
@@ -189,7 +189,7 @@ class Graph:
             logger.info(f"{todo['title']},完成")
             return {"todoID": todo['id'], "status": todo['status']}
         else:
-            logger.info(f"响应代码:{task.status_code}")
+            logger.error(f"响应代码:{task.status_code}")
 
     def getsks(self) -> list:
         list = sql.select(

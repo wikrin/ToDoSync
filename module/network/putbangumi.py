@@ -99,7 +99,11 @@ class Bangumi:
                 sql.initupdate(
                     table='data',
                     col_value=[('status', 'done')],
-                    where=[('epID >', status[-1][0]), ('epID <', status[-1][-1])],
+                    where=[
+                        ('epID >', status[-1][0]),
+                        ('epID <', status[-1][-1]),
+                        ('subject_id', self.subid),
+                    ],
                 )
                 logger.info(f"番剧ID{self.subid} {infomsg}EP{ep}")
 

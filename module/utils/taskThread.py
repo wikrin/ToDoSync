@@ -2,7 +2,7 @@ import concurrent.futures
 
 
 def threadPool(tasks: any, parlist: list) -> dict:
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
         sqlData: list = []
         response = pool.map(tasks, parlist)
     responses = list(zip(parlist, response))

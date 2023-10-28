@@ -121,19 +121,22 @@ class SQL:
     def initupdate(
         self, table: str, col_value: list[tuple], where: list[tuple] = [('epID', 0)]
     ) -> bool:
-        where_clause: str = ' WHERE 1=1 '
+        where_clause: str = ' WHERE 1=1'
         params = []
         upset = []
+
         for col_val in col_value:
             colval = f"`{col_val[0]}` = '{col_val[1]}'"
             upset.append(colval)
         query = f"UPDATE {table} SET {', '.join(upset)}"
+
         for clause in where:
-            where_clause += f'AND {clause[0]}=?'
+            where_clause += f" AND {clause[0]}=?"
             params.append(clause[1])
-            with self.conn:
-                self.cur.execute(query + where_clause, params)
-                return True
+
+        with self.conn:
+            self.cur.execute(query + where_clause, params)
+            return True
 
     def select(
         self, table: str, column: list[str] = ['MICROSOFT'], where: list[tuple] = [()]
